@@ -1,7 +1,7 @@
 <?php
 function loginAmi()
 {
-    $amiIp = '192.168.1.63';
+    $amiIp = '127.0.0.1';
     $socket = fsockopen($amiIp, "5038", $errno, $errstr, 60);
     $login  = "Action: Login".PHP_EOL;
     $login .= "UserName: asterisk".PHP_EOL;
