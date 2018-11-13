@@ -1,4 +1,56 @@
 <?php
+public function loginAmi()
+{
+    $amiIp = '127.0.0.1'
+    $socket = fsockopen($amiIp, "5038", $errno, $errstr, 60);
+    $login  = "Action: Login".PHP_EOL;
+    $login .= "UserName: asterisk".PHP_EOL.PHP_EOL;
+    $login .= "Secret: asterisk".PHP_EOL.PHP_EOL;
+    fputs($socket,$login);
+    usleep(30000);
+    return $socket;
+}
+    
+public function logoffAmi($socket)
+{
+    fputs($socket, "Action: Logoff".PHP_EOL.PHP_EOL);
+    //fclose($socket);
+}
+
+/**
+ * Retorna todas as filas em uma
+*/
+public function queueAllByName(){
+        
+    $content = [
+                "Action: QueueStatus".PHP_EOL.PHP_EOL,
+            ];
+
+    $socket = $this->loginAmi();
+    usleep(80000);
+    $authenticateResponse = fread($socket, 4096);
+
+    if(strpos($authenticateResponse, 'Success') !== false){
+        foreach ($content as $setDataToSocket) {
+            fputs($socket,$setDataToSocket);
+        }
+        usleep(280000);
+        
+        stream_set_timeout($socket,1);
+        $response = stream_get_contents($socket);            
+        $this->logoffAmi($socket);
+
+        $collection = formatArrayAmiToJson($response);
+        if(!empty($collection)){
+            return $collection;
+        }
+        return false;
+    }
+
+    $this->logoffAmi($socket);
+    return false;
+}
+
 function formatArrayAmiToJson($string)
 { 
     if(!empty($string)){
