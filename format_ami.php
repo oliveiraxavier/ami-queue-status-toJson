@@ -1,44 +1,44 @@
 <?php
-public function loginAmi()
+function loginAmi()
 {
-    $amiIp = '127.0.0.1'
+    $amiIp = '192.168.1.63';
     $socket = fsockopen($amiIp, "5038", $errno, $errstr, 60);
     $login  = "Action: Login".PHP_EOL;
-    $login .= "UserName: asterisk".PHP_EOL.PHP_EOL;
+    $login .= "UserName: asterisk".PHP_EOL;
     $login .= "Secret: asterisk".PHP_EOL.PHP_EOL;
     fputs($socket,$login);
     usleep(30000);
     return $socket;
 }
     
-public function logoffAmi($socket)
+function logoffAmi($socket)
 {
     fputs($socket, "Action: Logoff".PHP_EOL.PHP_EOL);
-    //fclose($socket);
+    fclose($socket);
 }
 
 /**
  * Retorna todas as filas em uma
 */
-public function queueAllByName(){
+function queueAllByName(){
         
     $content = [
                 "Action: QueueStatus".PHP_EOL.PHP_EOL,
             ];
 
-    $socket = $this->loginAmi();
-    usleep(80000);
+    $socket = loginAmi();
+    usleep(20000);
     $authenticateResponse = fread($socket, 4096);
-
+    var_dump($authenticateResponse);
     if(strpos($authenticateResponse, 'Success') !== false){
         foreach ($content as $setDataToSocket) {
             fputs($socket,$setDataToSocket);
         }
-        usleep(280000);
+        usleep(20000);
         
         stream_set_timeout($socket,1);
         $response = stream_get_contents($socket);            
-        $this->logoffAmi($socket);
+        logoffAmi($socket);
 
         $collection = formatArrayAmiToJson($response);
         if(!empty($collection)){
@@ -47,7 +47,7 @@ public function queueAllByName(){
         return false;
     }
 
-    $this->logoffAmi($socket);
+    logoffAmi($socket);
     return false;
 }
 
@@ -89,3 +89,6 @@ function formatArrayAmiToJson($string)
     return null;
     
 }
+
+//Example usage 
+var_dump(queueAllByName());
